@@ -6,9 +6,11 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CloudaxOrignal is ERC20, Ownable {
+contract Cloudax is ERC20, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
+    // 970
+    // 199999000
 
     mapping(address => bool) public _isBlacklisted;
     address public presaleAddress;

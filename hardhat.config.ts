@@ -132,5 +132,6 @@ const config: HardhatUserConfig = {
 
 // npx hardhat verify --contract contracts/Cloudax.sol:Cloudax --network arbitrum 0xf6a1Fd3d603e76A57c0aFBD7eA4C61cD561cAbe4
 // npx hardhat run scripts/deploy.ts --network arbitrum
+// npx hardhat flatten ./contracts/CloudaxTresuaryOriginal.sol > CloudaxTresuary.sol
 
 export default config;

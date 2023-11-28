@@ -1,29 +1,29 @@
 Arguments: 
-  /home/marcel/.nvm/versions/node/v20.9.0/bin/node /mnt/c/Program Files/nodejs/node_modules/yarn/bin/yarn.js add @openzeppelin/contracts/utils
+  /home/marcel/.nvm/versions/node/v18.16.0/bin/node /mnt/c/Program Files/nodejs/node_modules/yarn/bin/yarn.js add hardhat-flatten
 
 PATH: 
-  /home/marcel/.gvm/bin:/home/marcel/.cache/cloud-code/installer/google-cloud-sdk/bin:/home/marcel/.vscode-server-insiders/bin/60182c7e1a666961ded4d0319c154f52d85daf30/bin/remote-cli:/home/marcel/.gvm/bin:/home/marcel/.cargo/bin:/home/marcel/.local/share/pnpm:/home/marcel/.nvm/versions/node/v20.9.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Users/LAT_5520":/mnt/c/dump/focus/nvm:/mnt/c/Program Files/nodejs:/mnt/c/dump/focus/gradientfi:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/GitHub CLI/:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/c/Users/LAT 5520/AppData/Local/pnpm:/mnt/c/Users/LAT 5520/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/LAT_5520/AppData/Local/Programs/Microsoft VS Code Insiders/bin:/mnt/c/Users/LAT_5520/AppData/Roaming/npm:/mnt/c/Users/LAT 5520/AppData/Roaming/npm:/mnt/c/dump/focus/nvm:/mnt/c/Program Files/nodejs:/mnt/c/Users/LAT 5520/AppData/Local/Programs/Microsoft VS Code Insiders/bin:/mnt/c/Users/LAT 5520/AppData/Local/GitHubDesktop/bin:/snap/bin
+  /home/marcel/go/bin:/usr/local/go/bin:/home/marcel/.gvm/bin:/home/marcel/.cargo/bin:/home/marcel/.local/share/pnpm:/home/marcel/.nvm/versions/node/v18.16.0/bin:/home/marcel/.cache/cloud-code/installer/google-cloud-sdk/bin:/home/marcel/.vscode-server-insiders/bin/055458feab40fc308fc6d70b185068138c8cf8eb/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files (x86)/VMware/VMware Player/bin/:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Users/LAT_5520":/mnt/c/dump/focus/nvm:/mnt/c/Program Files/nodejs:/mnt/c/dump/focus/gradientfi:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/GitHub CLI/:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/c/Users/LAT 5520/AppData/Local/pnpm:/mnt/c/Users/LAT 5520/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/LAT_5520/AppData/Local/Programs/Microsoft VS Code Insiders/bin:/mnt/c/Users/LAT_5520/AppData/Roaming/npm:/mnt/c/Users/LAT 5520/AppData/Roaming/npm:/mnt/c/dump/focus/nvm:/mnt/c/Program Files/nodejs:/mnt/c/Users/LAT 5520/AppData/Local/Programs/Microsoft VS Code Insiders/bin:/mnt/c/Users/LAT 5520/AppData/Local/GitHubDesktop/bin:/snap/bin
 
 Yarn version: 
   1.22.19
 
 Node version: 
-  20.9.0
+  18.16.0
 
 Platform: 
   linux x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@openzeppelin%2fcontracts/utils: Request "https://registry.yarnpkg.com/@openzeppelin%2fcontracts/utils" returned a 405
-      at params.callback [as _callback] (/mnt/c/dump/focus/nvm/v16.18.0/node_modules/yarn/lib/cli.js:66154:18)
+  Error: https://registry.yarnpkg.com/hardhat-flatten: Not found
+      at params.callback [as _callback] (/mnt/c/dump/focus/nvm/v16.18.0/node_modules/yarn/lib/cli.js:66145:18)
       at self.callback (/mnt/c/dump/focus/nvm/v16.18.0/node_modules/yarn/lib/cli.js:140890:22)
-      at Request.emit (node:events:514:28)
+      at Request.emit (node:events:513:28)
       at Request.<anonymous> (/mnt/c/dump/focus/nvm/v16.18.0/node_modules/yarn/lib/cli.js:141862:10)
-      at Request.emit (node:events:514:28)
+      at Request.emit (node:events:513:28)
       at IncomingMessage.<anonymous> (/mnt/c/dump/focus/nvm/v16.18.0/node_modules/yarn/lib/cli.js:141784:12)
-      at Object.onceWrapper (node:events:628:28)
-      at IncomingMessage.emit (node:events:526:35)
-      at endReadableNT (node:internal/streams/readable:1408:12)
+      at Object.onceWrapper (node:events:627:28)
+      at IncomingMessage.emit (node:events:525:35)
+      at endReadableNT (node:internal/streams/readable:1359:12)
       at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
 
 npm manifest: 
@@ -35,29 +35,42 @@ npm manifest:
     "repository": "https://github.com/cloudaxhub/cloudax-v2.git",
     "author": "m-marcel",
     "license": "MIT",
-    "private": true,
+    "private": false,
+    "scripts": {
+      "start": "hardhat node",
+      "clean": "hardhat clean",
+      "compile": "hardhat compile",
+      "console": "hardhat console",
+      "finder": "hardhat finder",
+      "size": "hardhat size-contracts",
+      "test": "hardhat test",
+      "test:trace": "hardhat test --trace",
+      "test:fresh": "hardhat compile --force && hardhat test --no-compile --trace",
+      "test:coverage": "hardhat coverage"
+    },
     "devDependencies": {
       "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
       "@nomicfoundation/hardhat-ethers": "^3.0.0",
-      "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+      "@nomicfoundation/hardhat-network-helpers": "^1.0.3",
       "@nomicfoundation/hardhat-toolbox": "^3.0.0",
       "@nomicfoundation/hardhat-verify": "^1.0.0",
+      "@nomiclabs/hardhat-ethers": "^2.1.0",
+      "@nomiclabs/hardhat-etherscan": "^3.1.0",
+      "@openzeppelin/contracts": "^4.7.1",
       "@typechain/ethers-v6": "^0.4.0",
       "@typechain/hardhat": "^8.0.0",
       "@types/chai": "^4.2.0",
       "@types/mocha": ">=9.1.0",
       "@types/node": ">=16.0.0",
       "chai": "^4.2.0",
-      "ethers": "^6.4.0",
+      "dotenv": "^16.3.1",
+      "ethers": "^6",
       "hardhat": "^2.18.3",
       "hardhat-gas-reporter": "^1.0.8",
       "solidity-coverage": "^0.8.0",
       "ts-node": ">=8.0.0",
       "typechain": "^8.1.0",
       "typescript": ">=4.5.0"
-    },
-    "dependencies": {
-      "@openzeppelin/contracts": "^5.0.0"
     }
   }
 
@@ -714,7 +727,7 @@ Lockfile:
       debug "^4.1.1"
       lodash.isequal "^4.5.0"
   
-  "@nomicfoundation/hardhat-network-helpers@^1.0.0":
+  "@nomicfoundation/hardhat-network-helpers@^1.0.3":
     version "1.0.9"
     resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-network-helpers/-/hardhat-network-helpers-1.0.9.tgz#767449e8a2acda79306ac84626117583d95d25aa"
     integrity sha512-OXWCv0cHpwLUO2u7bFxBna6dQtCC2Gg/aN/KtJLO7gmuuA28vgmVKYFRCDUqrbjujzgfwQ2aKyZ9Y3vSmDqS7Q==
@@ -807,10 +820,31 @@ Lockfile:
       "@nomicfoundation/solidity-analyzer-win32-ia32-msvc" "0.1.1"
       "@nomicfoundation/solidity-analyzer-win32-x64-msvc" "0.1.1"
   
-  "@openzeppelin/contracts@^5.0.0":
-    version "5.0.0"
-    resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.0.0.tgz#ee0e4b4564f101a5c4ee398cd4d73c0bd92b289c"
-    integrity sha512-bv2sdS6LKqVVMLI5+zqnNrNU/CA+6z6CmwFXm/MzmOPBRSO5reEJN7z0Gbzvs0/bv/MZZXNklubpwy3v2+azsw==
+  "@nomiclabs/hardhat-ethers@^2.1.0":
+    version "2.2.3"
+    resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.2.3.tgz#b41053e360c31a32c2640c9a45ee981a7e603fe0"
+    integrity sha512-YhzPdzb612X591FOe68q+qXVXGG2ANZRvDo0RRUtimev85rCrAlv/TLMEZw5c+kq9AbzocLTVX/h2jVIFPL9Xg==
+  
+  "@nomiclabs/hardhat-etherscan@^3.1.0":
+    version "3.1.7"
+    resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-etherscan/-/hardhat-etherscan-3.1.7.tgz#72e3d5bd5d0ceb695e097a7f6f5ff6fcbf062b9a"
+    integrity sha512-tZ3TvSgpvsQ6B6OGmo1/Au6u8BrAkvs1mIC/eURA3xgIfznUZBhmpne8hv7BXUzw9xNL3fXdpOYgOQlVMTcoHQ==
+    dependencies:
+      "@ethersproject/abi" "^5.1.2"
+      "@ethersproject/address" "^5.0.2"
+      cbor "^8.1.0"
+      chalk "^2.4.2"
+      debug "^4.1.1"
+      fs-extra "^7.0.1"
+      lodash "^4.17.11"
+      semver "^6.3.0"
+      table "^6.8.0"
+      undici "^5.14.0"
+  
+  "@openzeppelin/contracts@^4.7.1":
+    version "4.9.3"
+    resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.3.tgz#00d7a8cf35a475b160b3f0293a6403c511099364"
+    integrity sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==
   
   "@scure/base@~1.1.0":
     version "1.1.3"
@@ -1805,6 +1839,11 @@ Lockfile:
     dependencies:
       path-type "^4.0.0"
   
+  dotenv@^16.3.1:
+    version "16.3.1"
+    resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.3.1.tgz#369034de7d7e5b120972693352a3bf112172cc3e"
+    integrity sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==
+  
   elliptic@6.5.4, elliptic@^6.5.2, elliptic@^6.5.4:
     version "6.5.4"
     resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.4.tgz#da37cebd31e79a1367e941b592ed1fbebd58abbb"
@@ -2018,10 +2057,10 @@ Lockfile:
       "@ethersproject/web" "5.7.1"
       "@ethersproject/wordlists" "5.7.0"
   
-  ethers@^6.4.0:
-    version "6.8.0"
-    resolved "https://registry.yarnpkg.com/ethers/-/ethers-6.8.0.tgz#0a26f57e96fd697cefcfcef464e0c325689d1daf"
-    integrity sha512-zrFbmQRlraM+cU5mE4CZTLBurZTs2gdp2ld0nG/f3ecBK+x6lZ69KSxBqZ4NjclxwfTxl5LeNufcBbMsTdY53Q==
+  ethers@^6:
+    version "6.8.1"
+    resolved "https://registry.yarnpkg.com/ethers/-/ethers-6.8.1.tgz#ee2a1a39b5f62a13678f90ccd879175391d0a2b4"
+    integrity sha512-iEKm6zox5h1lDn6scuRWdIdFJUCGg3+/aQWu0F4K0GVyEZiktFkqrJbRjTn1FlYEPz7RKA707D6g5Kdk6j7Ljg==
     dependencies:
       "@adraffy/ens-normalize" "1.10.0"
       "@noble/curves" "1.2.0"

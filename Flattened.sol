@@ -1278,11 +1278,9 @@ pragma solidity 0.8.20;
 
 
 
-contract Cloudax is ERC20, Ownable {
+contract CloudaxOrignal is ERC20, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
-    // 970
-    // 199999000
 
     mapping(address => bool) public _isBlacklisted;
     address public presaleAddress;

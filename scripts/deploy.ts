@@ -1,23 +1,18 @@
 import { ethers } from "hardhat";
-import { Contract, ContractFactory } from 'ethers';
+import { Contract, ContractFactory } from "ethers";
 
 async function main() {
-  
+  // const cloudax = await ethers.deployContract("Cloudax", []);
+  // await cloudax.waitForDeployment();
 
-  const cloudax = await ethers.deployContract("Cloudax");
-  await cloudax.waitForDeployment();
-  // address=0xf6a1Fd3d603e76A57c0aFBD7eA4C61cD561cAbe4
-  // const CloudaxContractName: string = 'Cloudax';
-  // const cloudaxFactory: ContractFactory = await ethers.getContractFactory(
-  //   CloudaxContractName
-  // );
-  // const cloudax: Contract = await cloudaxFactory.deploy();
-  // await cloudax.deployed();
-
-  console.log(
-    `cloudax deployed to ${cloudax}`
+  // Deploy CloudaxTresuary  Contract
+  const cloudaxTresuary = await ethers.deployContract(
+    "CloudaxTresauryVestingWallet",
+    ["0x815a44a4dfd4f149bb9e64b16db99f79484e3bce"]
   );
-  
+  await cloudaxTresuary.waitForDeployment();
+
+  console.log(`cloudaxTresuary deployed to ${cloudaxTresuary.getAddress()}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
