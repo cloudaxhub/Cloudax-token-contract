@@ -113,24 +113,11 @@ const config: HardhatUserConfig = {
       arbitrumOne: process.env.ARBITRUM_API_KEY || ''
     },
     
-    // customChains: [
-    //   {
-    //     network: 'custom',
-    //     chainId:
-    //       (process.env.CUSTOM_NETWORK_CHAIN_ID &&
-    //         Boolean(parseInt(process.env.CUSTOM_NETWORK_CHAIN_ID)) &&
-    //         parseInt(process.env.CUSTOM_NETWORK_CHAIN_ID)) ||
-    //       0,
-    //     urls: {
-    //       apiURL: process.env.CUSTOM_NETWORK_API_URL || '',
-    //       browserURL: process.env.CUSTOM_NETWORK_BROWSER_URL || '',
-    //     },
-    //   },
-    // ],
   },
 };
 
-// npx hardhat verify --contract contracts/Cloudax.sol:Cloudax --network arbitrum 0xf6a1Fd3d603e76A57c0aFBD7eA4C61cD561cAbe4
+// Setup for fast terminal actions
+// npx hardhat verify --contract contracts/CloudaxTresuary.sol:CloudaxTresauryVestingWallet --network arbitrum 0x675DE4CEc6c8123e1C7D6D801FE5d0C05f815B9a 0xf6a1Fd3d603e76A57c0aFBD7eA4C61cD561cAbe4
 // npx hardhat run scripts/deploy.ts --network arbitrum
 // npx hardhat flatten ./contracts/CloudaxTresuaryOriginal.sol > CloudaxTresuary.sol
 
