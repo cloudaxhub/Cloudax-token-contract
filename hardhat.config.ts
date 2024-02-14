@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-ethers"; 
 
 dotenv.config();
 function getWallet(): Array<string> {
@@ -120,5 +121,6 @@ const config: HardhatUserConfig = {
 // npx hardhat verify --contract contracts/CloudaxTresuary.sol:CloudaxTresauryVestingWallet --network arbitrum 0x675DE4CEc6c8123e1C7D6D801FE5d0C05f815B9a 0xf6a1Fd3d603e76A57c0aFBD7eA4C61cD561cAbe4
 // npx hardhat run scripts/deploy.ts --network arbitrum
 // npx hardhat flatten ./contracts/CloudaxTresuaryOriginal.sol > CloudaxTresuary.sol
+// npx hardhat test ./test/Cloudax.test.ts --grep "Token Transactions"
 
 export default config;

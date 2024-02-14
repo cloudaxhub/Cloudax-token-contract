@@ -9,7 +9,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
- * @title CloudaxMarketingVestingWallet (smart contract)
+ * @title CloudaxSeedVestingWallet (smart contract)
  * @dev A contract designed to manage the vesting of tokens according to predefined schedules.
  * It is intended to facilitate token distribution processes, particularly those involving
  * gradual release over time, which is common in token sales and employee compensation schemes.
@@ -21,7 +21,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - Optimized for gas efficiency and robustly handles errors to ensure a secure and reliable operation.
  *
  * Features:
- * - Manage the vesting schedules for marketing allocated token
+ * - Manage the vesting schedules for seed round allocated token
  * - Define custom vesting durations and amounts
  * - Enforce a cliff period before any tokens can be released
  * - Track and log token release events
@@ -39,7 +39,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  *
  * Use Cases:
  * - Token sale participant vesting
- * - Marketing equity vesting
+ * - Seed round vesting
  * - Community reward distribution
  * - Partner token distribution with vesting conditions
  *
@@ -49,7 +49,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - Beneficiary: Receives tokens according to the vesting schedule set by the owner.
  *
  * * Components:
- * - Contract: `CloudaxMarketingVestingWallet`, which extends `Ownable`, `ReentrancyGuard`, and `Pausable` to manage the vesting of tokens for the Cloudax Marketing team.
+ * - Contract: `CloudaxSeedVestingWallet`, which extends `Ownable`, `ReentrancyGuard`, and `Pausable` to manage the vesting of tokens for the Cloudax seed round.
  * - Key Functions:
  * - `initialize`: Initializes the vesting schedule with a start time and beneficiary address.
  * - `setBeneficiaryAddress`: Sets the beneficiary address for the vesting schedule.
@@ -61,8 +61,6 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - `getBeneficiaryAddress`: Retrieves the beneficiary address for the vesting schedule.
  * - `getReleasableAmount`: Returns the releasable amount of tokens.
  * - `getReleaseInfo`: Returns the token release information.
- * - `setTgeDate`: Sets the date of TGE.
- * - `releaseTgeFunds`: Releases funds upon TGE.
  * - `getVestingSchedule`: Returns the vesting schedule information for a given identifier.
  * - `getStartTime`: Returns the release start timestamp.
  * - `getDailyReleasableAmount`: Returns the daily releasable amount of tokens for the mining pool.
@@ -77,13 +75,20 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - `_vestingSchedule`: A mapping to store the vesting schedules.
  * - `_vestingScheduleCount`: The count of vesting schedules.
  * - `_lastReleasedTime`: The timestamp of the last token release.
- * - `tge_amount`: The amount of token allocated to be release on TGE.
- * - `tge_duration`: The duration till TGE.
  * - `_releasedAmount`: The total amount of tokens that have been released so far.
  * - `_previousTotalVestingAmount`: A mapping to keep track of the cumulative total vesting amount up to each schedule.
  */
 
-contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
+struct VestingSchedule {
+    // total amount of tokens to be released at the end of the vesting
+    uint256 totalAmount;
+    // start time of the vesting period
+    uint256 startTime;
+    // duration of the vesting period in seconds
+    uint256 duration;
+}
+
+contract CloudaxSeedVestingWallet is Ownable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     /**
@@ -93,20 +98,9 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
      */
     event Released(address beneficiaryAddress, uint256 amount);
 
-    struct VestingSchedule {
-        // total amount of tokens to be released at the end of the vesting
-        uint256 totalAmount;
-        // start time of the vesting period
-        uint256 startTime;
-        // duration of the vesting period in seconds
-        uint256 duration;
-    }
-
     uint256 private constant _RELEASE_TIME_UNIT = 30 days;
-    uint256 private constant _CLIFF_PEROID = 6 * 30 days;
+    uint256 private constant _CLIFF_PEROID = 30 days;
     IERC20 private immutable _token;
-    uint private tge_amount = 1000000 * (10**18);
-    uint private tge_duration;
 
     uint256 private _startTime;
     address private _beneficiaryAddress;
@@ -167,64 +161,26 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
     /**
     * @notice Initializes the vesting schedule with a start time and beneficiary address.
     * @dev Only callable by the contract owner. The start time is set to the current time plus the cliff period.
-    * @param beneficiary_   q`1The address to which the vested tokens will be transferred.
+    * @param beneficiary_ The address to which the vested tokens will be transferred.
     */
     function initialize(address beneficiary_) external onlyOwner {
         _startTime = block.timestamp + _CLIFF_PEROID;
-        uint256 userAllocation = ((_token.totalSupply() * 10) / 100) - tge_amount;
+        uint256 userAllocation = ((_token.totalSupply() * 5) / 100);
         uint256 RELEASE_AMOUNT_UNIT = userAllocation / 100;
         _setBeneficiaryAddress(beneficiary_);
-        uint8[48] memory vestingSchedule = [
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            3,
-            3,
-            3,
-            3
+        uint8[10] memory vestingSchedule = [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
         ];
-        for (uint256 i = 0; i < 48; i++) {
+        for (uint256 i = 0; i < 10; i++) {
             _createVestingSchedule(vestingSchedule[i] * RELEASE_AMOUNT_UNIT);
         }
         _unpause();
@@ -244,27 +200,6 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
     */
     function unpause() external onlyOwner {
         _unpause();
-    }
-
-    /**
-    * @notice Set the date/duration of the TGE
-    * @dev Only callable by the contract owner.
-    * @param months the duration of the TGE
-    */
-    function setTgeDate(uint256 months) external onlyOwner {
-        tge_duration = months;
-    }
-
-    /**
-    * @notice Releases the TGE amount
-    * @dev Only callable by the contract owner.
-    */
-    function releaseTgeFunds() external onlyOwner nonReentrant {
-        require(tge_duration <= getCurrentTime(), "TGE has not happened");
-        require(_beneficiaryAddress != address(0), "Beneficiary Address has not been set");
-        _releasedAmount = _releasedAmount + tge_amount;
-        emit Released(_beneficiaryAddress, tge_amount);
-        _token.safeTransfer(_beneficiaryAddress, tge_amount);
     }
 
     /**
@@ -307,7 +242,7 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
             "CloudrVesting: no vesting is available now"
         );
         require(
-            _vestingScheduleCount == 48,
+            _vestingScheduleCount == 10,
             "CloudrVesting: vesting schedule is not set"
         );
 
@@ -460,7 +395,7 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
             "CloudrVesting: no vesting is available now"
         );
         require(
-            _vestingScheduleCount == 48,
+            _vestingScheduleCount == 10,
             "CloudrVesting: vesting schedule is not set"
         );
 

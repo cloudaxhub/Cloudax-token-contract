@@ -9,7 +9,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
- * @title CloudaxMarketingVestingWallet (smart contract)
+ * @title CloudaxPublicIDOVestingWallet (smart contract)
  * @dev A contract designed to manage the vesting of tokens according to predefined schedules.
  * It is intended to facilitate token distribution processes, particularly those involving
  * gradual release over time, which is common in token sales and employee compensation schemes.
@@ -21,7 +21,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - Optimized for gas efficiency and robustly handles errors to ensure a secure and reliable operation.
  *
  * Features:
- * - Manage the vesting schedules for marketing allocated token
+ * - Manage the vesting schedules for public IDO allocated token
  * - Define custom vesting durations and amounts
  * - Enforce a cliff period before any tokens can be released
  * - Track and log token release events
@@ -39,7 +39,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  *
  * Use Cases:
  * - Token sale participant vesting
- * - Marketing equity vesting
+ * - Public IDO equity vesting
  * - Community reward distribution
  * - Partner token distribution with vesting conditions
  *
@@ -49,7 +49,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - Beneficiary: Receives tokens according to the vesting schedule set by the owner.
  *
  * * Components:
- * - Contract: `CloudaxMarketingVestingWallet`, which extends `Ownable`, `ReentrancyGuard`, and `Pausable` to manage the vesting of tokens for the Cloudax Marketing team.
+ * - Contract: `CloudaxPublicIDOVestingWallet`, which extends `Ownable`, `ReentrancyGuard`, and `Pausable` to manage the vesting of tokens for the Cloudax public IDO.
  * - Key Functions:
  * - `initialize`: Initializes the vesting schedule with a start time and beneficiary address.
  * - `setBeneficiaryAddress`: Sets the beneficiary address for the vesting schedule.
@@ -83,7 +83,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - `_previousTotalVestingAmount`: A mapping to keep track of the cumulative total vesting amount up to each schedule.
  */
 
-contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
+contract CloudaxPublicIDOVestingWallet is Ownable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     /**
@@ -92,6 +92,17 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
      * @param amount released amount of tokens
      */
     event Released(address beneficiaryAddress, uint256 amount);
+
+    /**
+     * @dev Emitted when tokens are burnt.
+     * @param owner Owner initiating the burn.
+     * @param recipent Recipient of the burnt tokens.
+     * @param admin Admin address involved in the burn.
+     * @param burnAddress Address where tokens are burned.
+     * @param amount Amount of tokens being burned.
+     */
+    event TokenBurnt(address owner, address recipent, address admin, address burnAddress, uint256 amount);
+
 
     struct VestingSchedule {
         // total amount of tokens to be released at the end of the vesting
@@ -102,10 +113,8 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
         uint256 duration;
     }
 
-    uint256 private constant _RELEASE_TIME_UNIT = 30 days;
-    uint256 private constant _CLIFF_PEROID = 6 * 30 days;
     IERC20 private immutable _token;
-    uint private tge_amount = 1000000 * (10**18);
+    uint private tge_amount = 10000000 * (10**18);
     uint private tge_duration;
 
     uint256 private _startTime;
@@ -165,88 +174,6 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
-    * @notice Initializes the vesting schedule with a start time and beneficiary address.
-    * @dev Only callable by the contract owner. The start time is set to the current time plus the cliff period.
-    * @param beneficiary_   q`1The address to which the vested tokens will be transferred.
-    */
-    function initialize(address beneficiary_) external onlyOwner {
-        _startTime = block.timestamp + _CLIFF_PEROID;
-        uint256 userAllocation = ((_token.totalSupply() * 10) / 100) - tge_amount;
-        uint256 RELEASE_AMOUNT_UNIT = userAllocation / 100;
-        _setBeneficiaryAddress(beneficiary_);
-        uint8[48] memory vestingSchedule = [
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            3,
-            3,
-            3,
-            3
-        ];
-        for (uint256 i = 0; i < 48; i++) {
-            _createVestingSchedule(vestingSchedule[i] * RELEASE_AMOUNT_UNIT);
-        }
-        _unpause();
-    }
-
-    /**
-    * @notice Pauses the vesting release process.
-    * @dev Only callable by the contract owner.
-    */
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    /**
-    * @notice Unpauses the vesting release process.
-    * @dev Only callable by the contract owner.
-    */
-    function unpause() external onlyOwner {
-        _unpause();
-    }
-
-    /**
     * @notice Set the date/duration of the TGE
     * @dev Only callable by the contract owner.
     * @param months the duration of the TGE
@@ -265,128 +192,6 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
         _releasedAmount = _releasedAmount + tge_amount;
         emit Released(_beneficiaryAddress, tge_amount);
         _token.safeTransfer(_beneficiaryAddress, tge_amount);
-    }
-
-    /**
-     * @notice Creates a new vesting schedule for a beneficiary.
-     * @param amount total amount of tokens to be released at the end of the vesting
-     */
-    function _createVestingSchedule(uint256 amount) internal {
-        uint256 scheduleId = _vestingScheduleCount;
-        _vestingSchedule[scheduleId].startTime =
-            _startTime +
-            scheduleId *
-            _RELEASE_TIME_UNIT;
-        _vestingSchedule[scheduleId].duration = _RELEASE_TIME_UNIT;
-        _vestingSchedule[scheduleId].totalAmount = amount;
-        uint256 nextScheduleId = scheduleId + 1;
-        _vestingScheduleCount = nextScheduleId;
-        _previousTotalVestingAmount[
-            nextScheduleId
-        ] = _previousTotalVestingAmount[scheduleId] + amount;
-    }
-
-    /**
-     * @dev Computes the releasable amount of tokens for a vesting schedule.
-     * @param currentTime current timestamp
-     * @return releasable the current releasable amount
-     * @return released the amount already released to the beneficiary
-     * @return total the total amount of token for the beneficiary
-     */
-    function _computeReleasableAmount(uint256 currentTime)
-        internal
-        view
-        returns (
-            uint256 releasable,
-            uint256 released,
-            uint256 total
-        )
-    {
-        require(
-            currentTime >= _startTime,
-            "CloudrVesting: no vesting is available now"
-        );
-        require(
-            _vestingScheduleCount == 48,
-            "CloudrVesting: vesting schedule is not set"
-        );
-
-        uint256 duration = currentTime + _startTime;
-        uint256 scheduleCount = duration / _RELEASE_TIME_UNIT;
-        uint256 remainTime = (duration - (_RELEASE_TIME_UNIT * scheduleCount));
-        uint256 releasableAmountTotal;
-
-        if (scheduleCount > _vestingScheduleCount) {
-            releasableAmountTotal = _previousTotalVestingAmount[
-                _vestingScheduleCount
-            ];
-        } else {
-            uint256 previousVestingTotal = _previousTotalVestingAmount[
-                scheduleCount
-            ];
-            releasableAmountTotal = (previousVestingTotal + (
-                (_vestingSchedule[scheduleCount].totalAmount * remainTime) / 
-                    _RELEASE_TIME_UNIT
-                )
-            );
-        }
-
-        uint256 releasableAmount = releasableAmountTotal - _releasedAmount;
-        return (releasableAmount, _releasedAmount, releasableAmountTotal);
-    }
-
-    /**
-     * @notice Returns the releasable amount of tokens.
-     * @return _releasable the releasable amount
-     */
-    function getReleasableAmount() external view returns (uint256 _releasable) {
-        uint256 currentTime = getCurrentTime();
-        (_releasable, , ) = _computeReleasableAmount(currentTime);
-    }
-
-    /**
-     * @notice Returns the token release info.
-     * @return releasable the current releasable amount
-     * @return released the amount already released to the beneficiary
-     * @return total the total amount of token for the beneficiary
-     */
-    function getReleaseInfo()
-        public
-        view
-        returns (
-            uint256 releasable,
-            uint256 released,
-            uint256 total
-        )
-    {
-        uint256 currentTime = getCurrentTime();
-        (releasable, released, total) = _computeReleasableAmount(currentTime);
-    }
-
-    /**
-    * @dev Internal function to release the releasable amount of tokens.
-    * @param currentTime The current timestamp.
-    * @return True if the release was successful, false otherwise.
-    */
-    function _release(uint256 currentTime) internal returns (bool) {
-        require(
-            currentTime >= _startTime,
-            "CloudrVesting: vesting schedule is not initialized"
-        );
-        (uint256 releaseAmount, , ) = _computeReleasableAmount(currentTime);
-        _token.safeTransfer(_beneficiaryAddress, releaseAmount);
-        _releasedAmount = _releasedAmount + releaseAmount;
-        emit Released(_beneficiaryAddress, releaseAmount);
-        return true;
-    }
-
-    /**
-     * @notice Release the releasable amount of tokens.
-     * @return the success or failure
-     */
-    function release() external whenNotPaused nonReentrant returns (bool) {
-        require(_release(getCurrentTime()), "CloudrVesting: release failed");
-        return true;
     }
 
     /**
@@ -416,27 +221,6 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @dev Returns the number of vesting schedules managed by this contract.
-     * @return the number of vesting schedules
-     */
-    function getVestingSchedulesCount() external view returns (uint256) {
-        return _vestingScheduleCount;
-    }
-
-    /**
-     * @notice Returns the vesting schedule information for a given identifier.
-     * @param scheduleId vesting schedule index: 0, 1, 2, ...
-     * @return the vesting schedule structure information
-     */
-    function getVestingSchedule(uint256 scheduleId)
-        external
-        view
-        returns (VestingSchedule memory)
-    {
-        return _vestingSchedule[scheduleId];
-    }
-
-    /**
      * @notice Returns the release start timestamp.
      * @return the block timestamp
      */
@@ -444,31 +228,6 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
         return _startTime;
     }
 
-    /**
-     * @notice Returns the daily releasable amount of tokens for the mining pool.
-     * @param currentTime current timestamp
-     * @return the amount of token
-     */
-    function getDailyReleasableAmount(uint256 currentTime)
-        external
-        view
-        whenNotPaused
-        returns (uint256)
-    {
-        require(
-            currentTime >= _startTime,
-            "CloudrVesting: no vesting is available now"
-        );
-        require(
-            _vestingScheduleCount == 48,
-            "CloudrVesting: vesting schedule is not set"
-        );
-
-        uint256 duration = currentTime - _startTime;
-        uint256 scheduleCount = duration / _RELEASE_TIME_UNIT;
-        if (scheduleCount > _vestingScheduleCount) return 0;
-        return _vestingSchedule[scheduleCount].totalAmount / 30;
-    }
 
     /**
      * @notice Returns the current timestamp.
@@ -477,4 +236,30 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
     function getCurrentTime() internal view virtual returns (uint256) {
         return block.timestamp;
     }
+
+    /**
+    * @notice Burns a specified amount of tokens by sending them to a zero address.
+    * @dev Only the owner can call this function.
+    * @param amount The amount of tokens to burn.
+    */
+    function burn(uint256 amount) public onlyOwner {
+        // burn CLDX by sending it to a zero address
+        require(amount != 0, "Amount must be greater than Zero");
+        require(
+            _token.balanceOf(address(this)) >= amount,
+            "Not enough tokens in treasury"
+        );
+        _token.transfer(
+            address(0x000000000000000000000000000000000000dEaD),
+            amount
+        );
+
+        emit TokenBurnt(
+            address(this),
+            msg.sender,
+            msg.sender,
+            address(0x000000000000000000000000000000000000dEaD),
+            amount
+        );
+    }  
 }

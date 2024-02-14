@@ -88,7 +88,7 @@ contract Cloudax is ERC20, Ownable {
      * @param amount The amount of tokens to send.
      */
     function sendTokens(address to, uint256 amount) external {
-        _transfer(msg.sender, to, amount);
+        _update(msg.sender, to, amount);
     }
 
     /**
@@ -97,7 +97,7 @@ contract Cloudax is ERC20, Ownable {
      * @param amount The amount of tokens to receive.
      */
     function receiveTokens(address from, uint256 amount) external {
-        _transfer(from, msg.sender, amount);
+        _update(from, msg.sender, amount);
     }
 
     /**

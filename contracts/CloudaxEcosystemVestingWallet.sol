@@ -9,7 +9,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
- * @title CloudaxMarketingVestingWallet (smart contract)
+ * @title CloudaxEcosystemVestingWallet (smart contract)
  * @dev A contract designed to manage the vesting of tokens according to predefined schedules.
  * It is intended to facilitate token distribution processes, particularly those involving
  * gradual release over time, which is common in token sales and employee compensation schemes.
@@ -21,7 +21,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - Optimized for gas efficiency and robustly handles errors to ensure a secure and reliable operation.
  *
  * Features:
- * - Manage the vesting schedules for marketing allocated token
+ * - Manage the vesting schedules for ecosystem growth allocated token
  * - Define custom vesting durations and amounts
  * - Enforce a cliff period before any tokens can be released
  * - Track and log token release events
@@ -39,7 +39,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  *
  * Use Cases:
  * - Token sale participant vesting
- * - Marketing equity vesting
+ * - Ecosystem growth equity vesting
  * - Community reward distribution
  * - Partner token distribution with vesting conditions
  *
@@ -49,7 +49,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - Beneficiary: Receives tokens according to the vesting schedule set by the owner.
  *
  * * Components:
- * - Contract: `CloudaxMarketingVestingWallet`, which extends `Ownable`, `ReentrancyGuard`, and `Pausable` to manage the vesting of tokens for the Cloudax Marketing team.
+ * - Contract: `CloudaxEcosystemVestingWallet`, which extends `Ownable`, `ReentrancyGuard`, and `Pausable` to manage the vesting of tokens for the Cloudax Ecosystem growth team.
  * - Key Functions:
  * - `initialize`: Initializes the vesting schedule with a start time and beneficiary address.
  * - `setBeneficiaryAddress`: Sets the beneficiary address for the vesting schedule.
@@ -83,7 +83,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * - `_previousTotalVestingAmount`: A mapping to keep track of the cumulative total vesting amount up to each schedule.
  */
 
-contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
+contract CloudaxEcosystemVestingWallet is Ownable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     /**
@@ -103,7 +103,7 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
     }
 
     uint256 private constant _RELEASE_TIME_UNIT = 30 days;
-    uint256 private constant _CLIFF_PEROID = 6 * 30 days;
+    uint256 private constant _CLIFF_PEROID = 3 * 30 days;
     IERC20 private immutable _token;
     uint private tge_amount = 1000000 * (10**18);
     uint private tge_duration;
@@ -174,57 +174,69 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
         uint256 userAllocation = ((_token.totalSupply() * 10) / 100) - tge_amount;
         uint256 RELEASE_AMOUNT_UNIT = userAllocation / 100;
         _setBeneficiaryAddress(beneficiary_);
-        uint8[48] memory vestingSchedule = [
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            3,
-            3,
-            3,
-            3
-        ];
-        for (uint256 i = 0; i < 48; i++) {
+        uint8[60] memory vestingSchedule = [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2,
+                2
+            ];
+        for (uint256 i = 0; i < 60; i++) {
             _createVestingSchedule(vestingSchedule[i] * RELEASE_AMOUNT_UNIT);
         }
         _unpause();
@@ -307,7 +319,7 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
             "CloudrVesting: no vesting is available now"
         );
         require(
-            _vestingScheduleCount == 48,
+            _vestingScheduleCount == 60,
             "CloudrVesting: vesting schedule is not set"
         );
 
@@ -460,7 +472,7 @@ contract CloudaxMarketingVestingWallet is Ownable, ReentrancyGuard, Pausable {
             "CloudrVesting: no vesting is available now"
         );
         require(
-            _vestingScheduleCount == 48,
+            _vestingScheduleCount == 60,
             "CloudrVesting: vesting schedule is not set"
         );
 
