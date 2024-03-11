@@ -77,6 +77,13 @@ contract CloudaxTresauryVestingWallet is Ownable, ReentrancyGuard, Pausable {
     event Released(address beneficiaryAddress, uint256 amount);
 
     /**
+     * @dev Emitted when oracle address is set.
+     * @param oldOracleAddress Old beneficiary address.
+     * @param newOracleAddress New beneficiary address.
+     */
+    event OracleSet(address oldOracleAddress, address newOracleAddress);
+
+    /**
      * @dev Emitted when beneficiary address is set.
      * @param oldBeneficiaryAddress Old beneficiary address.
      * @param newBeneficiaryAddress New beneficiary address.
@@ -136,6 +143,7 @@ contract CloudaxTresauryVestingWallet is Ownable, ReentrancyGuard, Pausable {
 
     uint256 private _startTime;        // Start time of the contract
     address private _beneficiaryAddress;   // Address of the beneficiary
+    address private oracle;   // Address of the oracle
     mapping(uint256 => VestingSchedule) private _vestingSchedule;   // Mapping of vesting schedules
     uint256 private _vestingScheduleCount;   // Counter for vesting schedules
     uint256 private _lastReleasedTime;      // Last time tokens were released
@@ -145,6 +153,12 @@ contract CloudaxTresauryVestingWallet is Ownable, ReentrancyGuard, Pausable {
     mapping(address => uint256) public _swappedForCldx;   // Mapping of swapped tokens for CLDX
     mapping(address => uint256) public ecoApprovalWallet;  // Mapping of Eco approval wallets
 
+    // Modifier to restrict function execution to the oracle address
+    modifier onlyOracle() {
+        require(msg.sender == oracle, "Caller is not the oracle");
+        _;
+    }
+
     /**
      * @dev Constructor to initialize the contract.
      * @param token_ Address of the ERC20 token.
@@ -153,6 +167,7 @@ contract CloudaxTresauryVestingWallet is Ownable, ReentrancyGuard, Pausable {
     constructor(address token_, address initialOwner) Ownable(initialOwner) {
         require(token_ != address(0), "invalid token address");
         _token = ERC20(token_);
+        oracle = msg.sender;
         _pause();  // Pause the contract initially
     }
 
@@ -172,6 +187,20 @@ contract CloudaxTresauryVestingWallet is Ownable, ReentrancyGuard, Pausable {
     */
     function setBeneficiaryAddress(address beneficiary_) external onlyOwner {
         _setBeneficiaryAddress(beneficiary_);
+    }
+
+    /**
+    * @notice Sets the oracle address.
+    * @dev Only the owner can call this function.
+    * @param _oracle The address to set as the oracle address.
+    */
+    function setOracleAddress(address _oracle) external onlyOwner {
+        require(
+            _oracle != address(0),
+            "CloudrVesting: invalid oracle address"
+        );
+        emit OracleSet(oracle, _oracle);
+        oracle = _oracle;
     }
 
     /**
@@ -789,7 +818,7 @@ contract CloudaxTresauryVestingWallet is Ownable, ReentrancyGuard, Pausable {
     function swapCldxToEco(
         uint256 amount,
         address recipent
-    ) external nonReentrant {
+    ) external nonReentrant onlyOracle{
         require(
             ecoApprovalWallet[msg.sender] != 0,
             "This wallet is not an approved EcoWallet"
