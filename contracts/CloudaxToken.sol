@@ -97,6 +97,8 @@ contract Cloudax is ERC20, Ownable {
      * @param amount The amount of tokens to receive.
      */
     function receiveTokens(address from, uint256 amount) external {
+        // Check if the caller has enough allowance from the 'from' address
+        require(allowance(from, msg.sender) >= amount, "Not enough allowance");
         _update(from, msg.sender, amount);
     }
 
