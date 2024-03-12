@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity  0.8.20;
+pragma solidity 0.8.20;
 
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title Cloudax Token
@@ -52,7 +52,7 @@ contract Cloudax is ERC20, Ownable {
     mapping(address => bool) public _isBlacklisted;
     address public presaleAddress;
 
-    uint256 private _totalSupply =  200000000 * (10**18);
+    uint256 private _totalSupply = 200000000 * (10 ** 18);
     bool public isTradingEnabled = false;
 
     event Blacklisted(address account, bool status);
@@ -61,7 +61,9 @@ contract Cloudax is ERC20, Ownable {
      * @dev Constructor that mints the total supply of tokens to the contract creator.
      * @param initialOwner The address of the initial owner of the contract.
      */
-    constructor(address initialOwner) Ownable(initialOwner) ERC20("Cloudax", "CLDX") {
+    constructor(
+        address initialOwner
+    ) Ownable(initialOwner) ERC20("Cloudax", "CLDX") {
         _mint(msg.sender, _totalSupply);
     }
 
@@ -74,8 +76,15 @@ contract Cloudax is ERC20, Ownable {
      * @param to The address receiving tokens.
      * @param amount The amount of tokens to transfer.
      */
-    function _update(address from, address to, uint256 amount) internal override {
-        require(!_isBlacklisted[from] && !_isBlacklisted[to], "An address is blacklisted");
+    function _update(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        require(
+            !_isBlacklisted[from] && !_isBlacklisted[to],
+            "An address is blacklisted"
+        );
         if (from != owner() && from != presaleAddress) {
             require(isTradingEnabled, "Trading is not enabled yet");
         }
@@ -97,9 +106,8 @@ contract Cloudax is ERC20, Ownable {
      * @param amount The amount of tokens to receive.
      */
     function receiveTokens(address from, uint256 amount) external {
-        // Check if the caller has enough allowance from the 'from' address
-        require(allowance(from, msg.sender) >= amount, "Not enough allowance");
-        _update(from, msg.sender, amount);
+        // Use transferFrom instead of require
+        ERC20.transferFrom(from, msg.sender, amount);
     }
 
     /**
@@ -122,40 +130,42 @@ contract Cloudax is ERC20, Ownable {
     }
 
     /**
-    * @notice Enables or disables the trading of tokens.
-    * @dev Can only be called by the owner.
-    * @param _status True if trading should be enabled, false otherwise.
-    */
+     * @notice Enables or disables the trading of tokens.
+     * @dev Can only be called by the owner.
+     * @param _status True if trading should be enabled, false otherwise.
+     */
     function setTradingEnabled(bool _status) external onlyOwner {
         isTradingEnabled = _status;
     }
 
-
     /**
-    * @notice Withdraws Ether from the contract to the specified recipient.
-    * @dev Can only be called by the owner.
-    * @param recipient The address to receive the Ether.
-    * @param amount The amount of Ether to withdraw.
-    */
-    function withdrawEther(address recipient, uint256 amount) external onlyOwner {
+     * @notice Withdraws Ether from the contract to the specified recipient.
+     * @dev Can only be called by the owner.
+     * @param recipient The address to receive the Ether.
+     * @param amount The amount of Ether to withdraw.
+     */
+    function withdrawEther(
+        address recipient,
+        uint256 amount
+    ) external onlyOwner {
         require(recipient != address(0), "Can't be a zero address");
 
         uint256 balance = address(this).balance;
 
         require(balance >= amount, "CLDX: Insufficient balance");
-        (bool success, ) = payable(recipient).call{ value: amount }("");
+        (bool success, ) = payable(recipient).call{value: amount}("");
         if (!success) {
             revert("CLDX: Transfer failed");
         }
     }
 
     /**
-    * @notice Withdraws tokens from the contract to the specified recipient.
-    * @dev Can only be called by the owner.
-    * @param tokenAddress The address of the token contract.
-    * @param recipient The address to receive the tokens.
-    * @param amount The amount of tokens to withdraw.
-    */
+     * @notice Withdraws tokens from the contract to the specified recipient.
+     * @dev Can only be called by the owner.
+     * @param tokenAddress The address of the token contract.
+     * @param recipient The address to receive the tokens.
+     * @param amount The amount of tokens to withdraw.
+     */
     function withdrawTokens(
         address tokenAddress,
         address recipient,
