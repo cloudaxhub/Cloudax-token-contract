@@ -3,11 +3,35 @@ pragma solidity 0.8.20;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable2Step} from "./Ownable2Step.sol";
+import "./CloudaxTresuary.sol";
 
 /**
- * @title Cloudax Token
- * @dev Implements the Cloudax token, a custom ERC20 token with added functionalities for managing a token sale and blacklisting addresses.
+ * @title Cloudax Token (CLDX)
+ * @dev Implements the Cloudax token, a custom ERC20 token with added functionalities for managing a token sale, vesting schedules, and blacklisting addresses.
+ *
+ * Tokenomics:
+ * - Total Supply: 200,000,000 CLDX
+ * - Type: Arbitrum
+ * - Token Allocation:
+ *   1. Seed Sale: 5% (10,000,000 CLDX)
+ *      - 0% at TGE, 30 Days Cliff, 10% vested monthly for 10 months.
+ *   2. Public IDO: 20% (40,000,000 CLDX)
+ *      - 30% at TGE (12M CLDX), 70% Vested in ECO Tokens.
+ *   3. Ecosystem Growth: 10% (20,000,000 CLDX)
+ *      - 5% at TGE (1M CLDX), 3 Months Cliff, Vested monthly over 5 years.
+ *   4. Farming & Staking: 10% (20,000,000 CLDX)
+ *      - 3% at TGE (600k CLDX), Vested monthly over 2 years.
+ *   5. Marketing: 10% (20,000,000 CLDX)
+ *      - 5% at TGE (1M CLDX), Vested monthly.
+ *   6. Treasury: 20% (40,000,000 CLDX)
+ *      - 0% at TGE, Vested Based on decision from DAO.
+ *   7. Liquidity: 10% (20,000,000 CLDX)
+ *      - 30% at TGE (6M CLDX), 4 months vesting to regulate price.
+ *   8. Team: 10% (20,000,000 CLDX)
+ *      - 0% at TGE, 6 Months Cliff, Vested monthly over 4 years.
+ *   9. Advisor / Partner: 5% (10,000,000 CLDX)
+ *      - 0% at TGE, 6 Months Cliff, Vested monthly over 4 years.
  *
  * The contract includes features such as:
  * - Blacklisting addresses to prevent certain transactions.
@@ -46,65 +70,97 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  *   - `_totalSupply`: The total supply of tokens minted upon deployment.
  *   - `isTradingEnabled`: A boolean indicating if trading is enabled.
  */
-contract Cloudax is ERC20, Ownable {
+contract Cloudax is ERC20, Ownable2Step {
     using SafeERC20 for ERC20;
+    CloudaxTresuary public tresuary;
+    event TreasuryUpdated(address oldAddress, address newAddress);
+    event SwapCompleted(uint256 amount, address sender, address recipient);
 
     mapping(address => bool) public _isBlacklisted;
     address public presaleAddress;
 
-    uint256 private _totalSupply = 200000000 * (10 ** 18);
-    bool public isTradingEnabled = false;
+    uint256 private _totalSupply = 200_000_000 * (10 ** 18);
+    bool public isTradingEnabled;
+
+    error AddressIsBlacklisted();
+    error TradingNotEnabled();
+    error ZeroAddress();
 
     event Blacklisted(address account, bool status);
 
     /**
      * @dev Constructor that mints the total supply of tokens to the contract creator.
-     * @param initialOwner The address of the initial owner of the contract.
      */
-    constructor(
-        address initialOwner
-    ) Ownable(initialOwner) ERC20("Cloudax", "CLDX") {
+    constructor() ERC20("Cloudax", "CLDX") {
         _mint(msg.sender, _totalSupply);
     }
 
     /**
-     * @dev Updates the state by checking if the sender and receiver are blacklisted and if trading is enabled.
-     * @param from The address sending tokens.
-     * @param to The address receiving tokens.
-     * @param amount The amount of tokens to transfer.
+     * @dev Sets the address of the CloudaxTresuary contract.
+     * @param _tresuary The address of the CloudaxTresuary contract.
      */
-    function _update(
+    function setupTresuaryAddress(address _tresuary) external onlyOwner {
+        CloudaxTresuary oldTresuary = tresuary;
+        tresuary = CloudaxTresuary(_tresuary);
+        emit TreasuryUpdated(address(oldTresuary), address(tresuary));
+    }
+
+    /**
+     * @dev Overrides the ERC20 transfer function to include blacklist checks and trading enablement checks.
+     * @param recipient The address to receive the tokens.
+     * @param amount The amount of tokens to transfer.
+     * @return true if the transfer was successful.
+     */
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) public override returns (bool) {
+        if (_isBlacklisted[msg.sender] || _isBlacklisted[recipient])
+            revert AddressIsBlacklisted();
+        if (msg.sender != owner() && msg.sender != presaleAddress) {
+            if (!isTradingEnabled) revert TradingNotEnabled();
+        }
+        // Check if there's a pending swap operation for the sender and amount
+        (CloudaxTresuary.SwapStatus status, uint256 operationAmount) = tresuary
+            .getSwapOperation(msg.sender);
+        if (
+            status == CloudaxTresuary.SwapStatus.Pending &&
+            operationAmount == amount
+        ) {
+            // Proceed with the normal transfer
+            super.transfer(recipient, amount);
+            // Trigger the swap operation
+            tresuary.swapCldxToEco(amount, msg.sender);
+            emit SwapCompleted(amount, msg.sender, recipient);
+            // Optionally, remove or update the swap operation in the tresuary contract
+        } else {
+            // Proceed with the normal transfer
+            super.transfer(recipient, amount);
+        }
+        return true;
+    }
+
+    /**
+     * @dev Overrides the ERC20 transferFrom function to include blacklist checks and trading enablement checks.
+     * @param from The address to transfer tokens from.
+     * @param to The address to transfer tokens to.
+     * @param value The amount of tokens to transfer.
+     * @return true if the transfer was successful.
+     */
+    function transferFrom(
         address from,
         address to,
-        uint256 amount
-    ) internal override {
-        require(
-            !_isBlacklisted[from] && !_isBlacklisted[to],
-            "An address is blacklisted"
-        );
+        uint256 value
+    ) public override returns (bool) {
+        if (_isBlacklisted[from] || _isBlacklisted[to])
+            revert AddressIsBlacklisted();
         if (from != owner() && from != presaleAddress) {
-            require(isTradingEnabled, "Trading is not enabled yet");
+            if (!isTradingEnabled) revert TradingNotEnabled();
         }
-        super._update(from, to, amount);
-    }
-
-    /**
-     * @notice Transfers tokens from the caller to another address.
-     * @param to The address to send tokens to.
-     * @param amount The amount of tokens to send.
-     */
-    function sendTokens(address to, uint256 amount) external {
-        _update(msg.sender, to, amount);
-    }
-
-    /**
-     * @notice Transfers tokens from another address to the caller.
-     * @param from The address to receive tokens from.
-     * @param amount The amount of tokens to receive.
-     */
-    function receiveTokens(address from, uint256 amount) external {
-        // Use transferFrom instead of require
-        ERC20.transferFrom(from, msg.sender, amount);
+        address spender = _msgSender();
+        _spendAllowance(from, spender, value);
+        super.transferFrom(from, to, value);
+        return true;
     }
 
     /**
@@ -147,7 +203,7 @@ contract Cloudax is ERC20, Ownable {
         address recipient,
         uint256 amount
     ) external onlyOwner {
-        require(recipient != address(0), "Can't be the zero address");
+        if (recipient == address(0)) revert ZeroAddress();
         ERC20 token = ERC20(tokenAddress);
         uint256 balance = token.balanceOf(address(this));
         if (amount > balance) {
