@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable2Step} from "./Ownable2Step.sol";
-import "./CloudaxTresuary.sol";
+import "./ICloudaxTresuary.sol";
 
 /**
  * @title Cloudax Token (CLDX)
@@ -72,7 +72,7 @@ import "./CloudaxTresuary.sol";
  */
 contract Cloudax is ERC20, Ownable2Step {
     using SafeERC20 for ERC20;
-    CloudaxTresuary public tresuary;
+    ICloudaxTresuary public tresuary;
     event TreasuryUpdated(address oldAddress, address newAddress);
     event SwapCompleted(uint256 amount, address sender, address recipient);
 
@@ -100,8 +100,8 @@ contract Cloudax is ERC20, Ownable2Step {
      * @param _tresuary The address of the CloudaxTresuary contract.
      */
     function setupTresuaryAddress(address _tresuary) external onlyOwner {
-        CloudaxTresuary oldTresuary = tresuary;
-        tresuary = CloudaxTresuary(_tresuary);
+        ICloudaxTresuary oldTresuary = tresuary;
+        tresuary = ICloudaxTresuary(_tresuary);
         emit TreasuryUpdated(address(oldTresuary), address(tresuary));
     }
 
@@ -121,10 +121,10 @@ contract Cloudax is ERC20, Ownable2Step {
             if (!isTradingEnabled) revert TradingNotEnabled();
         }
         // Check if there's a pending swap operation for the sender and amount
-        (CloudaxTresuary.SwapStatus status, uint256 operationAmount) = tresuary
+        (ICloudaxTresuary.SwapStatus status, uint256 operationAmount) = tresuary
             .getSwapOperation(msg.sender);
         if (
-            status == CloudaxTresuary.SwapStatus.Pending &&
+            status == ICloudaxTresuary.SwapStatus.Pending &&
             operationAmount == amount
         ) {
             // Proceed with the normal transfer
